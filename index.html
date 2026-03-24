@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบติดตามการให้บริการผู้ป่วยกลุ่มเป้าหมาย | รพ.กุสุมาลย์</title>
+    
+    <!-- Google Fonts: Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            900: '#134e4a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- PapaParse for Google Sheets CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { background-color: #f8fafc; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="font-sans text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-brand-700 to-brand-500 text-white pb-24 pt-8 px-4 sm:px-6 lg:px-8 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold mb-2 tracking-tight">ระบบติดตามการให้บริการผู้ป่วยกลุ่มเป้าหมาย</h1>
+                <p class="text-brand-100 text-base md:text-lg font-light flex items-center gap-2">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    โรงพยาบาลกุสุมาลย์ จังหวัดสกลนคร | ปีงบประมาณ 2569
+                </p>
+            </div>
+            <div class="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm border border-white/10">
+                <div id="connection-status-dot" class="w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse"></div>
+                <span id="connection-status-text">กำลังโหลดข้อมูล...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 mb-12">
+        
+        <!-- Row 1: Ward Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            
+            <!-- Card 1: หอผู้ป่วยสามัญ (Left) -->
+            <div class="glass-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-0">หอผู้ป่วยสามัญ</h2>
+                        <p class="text-slate-500 text-xs mt-1">จำนวนเตียงทั้งหมด 36 เตียง</p>
+                    </div>
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl shadow-inner border border-blue-100">
+                        <i data-lucide="bed-double" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-200">
+                    <div class="pr-4 flex flex-col justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">รายใหม่วันนี้</p>
+                            <div class="flex items-baseline gap-2">
+                                <h3 id="stat-general-new" class="text-5xl font-bold text-red-700">-</h3>
+                                <span class="text-slate-500 text-sm font-medium">ราย</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-slate-500 text-xs font-medium">
+                            ยอดนอนวันนี้ <span id="stat-general-today" class="font-bold text-sm mx-1">-</span> ราย
+                        </div>
+                    </div>
+                    <div class="pl-4 flex flex-col justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">สะสมเดือนนี้</p>
+                            <div class="flex items-baseline gap-2">
+                                <h3 id="stat-general-total" class="text-5xl font-bold text-slate-800">-</h3>
+                                <span class="text-slate-500 text-sm font-medium">ราย</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-slate-500 text-xs font-medium">
+                            เป้าหมาย 360 ราย (<span id="stat-general-percent" class="font-bold">-</span>%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: กราฟแท่งแนวนอน อัตราครองเตียงตึกสามัญ -->
+                <hr class="my-5 border-slate-100">
+                <div>
+                    <p class="text-sm font-semibold text-slate-700 mb-1">อัตราครองเตียงตึกสามัญ</p>
+                    <div class="relative pt-4 pb-1">
+                        <!-- 80% Target Line -->
+                        <div class="absolute top-0 bottom-0 left-[80%] z-10 -translate-x-1/2 pointer-events-none flex flex-col">
+                            <span class="text-[10px] font-bold text-rose-500 bg-white px-1 leading-none pb-1">80%</span>
+                            <div class="w-px h-full border-l-2 border-dashed border-rose-300 mx-auto"></div>
+                        </div>
+
+                        <div class="mb-3 relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">วันนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-gen-day-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-gen-day-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3 relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">เดือนนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-gen-month-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-gen-month-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">ปีงบนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-gen-year-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-gen-year-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: หอผู้ป่วยปุญโญภาส (Right) -->
+            <div class="glass-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 mb-0">หอผู้ป่วยปุญโญภาส</h2>
+                        <p class="text-slate-500 text-xs mt-1">จำนวนเตียงทั้งหมด 6 เตียง</p>
+                    </div>
+                    <div class="p-3 bg-brand-50 text-brand-600 rounded-2xl shadow-inner border border-brand-100">
+                        <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 divide-x divide-slate-200">
+                    <div class="pr-4 flex flex-col justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">รายใหม่วันนี้</p>
+                            <div class="flex items-baseline gap-2">
+                                <h3 id="stat-punyo-new" class="text-5xl font-bold text-red-700">-</h3>
+                                <span class="text-slate-500 text-sm font-medium">ราย</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-slate-500 text-xs font-medium">
+                            ยอดนอนวันนี้ <span id="stat-punyo-today" class="font-bold text-sm mx-1">-</span> ราย
+                        </div>
+                    </div>
+                    <div class="pl-4 flex flex-col justify-between">
+                        <div>
+                            <p class="text-slate-500 text-sm font-medium mb-1">สะสมเดือนนี้</p>
+                            <div class="flex items-baseline gap-2">
+                                <h3 id="stat-punyo-total" class="text-5xl font-bold text-slate-800">-</h3>
+                                <span class="text-slate-500 text-sm font-medium">ราย</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 text-slate-500 text-xs font-medium">
+                            เป้าหมาย 60 ราย (<span id="stat-punyo-percent" class="font-bold">-</span>%)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: กราฟแท่งแนวนอน อัตราครองเตียงตึกปุญโญภาส -->
+                <hr class="my-5 border-slate-100">
+                <div>
+                    <p class="text-sm font-semibold text-slate-700 mb-1">อัตราครองเตียงตึกปุญโญภาส</p>
+                    <div class="relative pt-4 pb-1">
+                        <!-- 80% Target Line -->
+                        <div class="absolute top-0 bottom-0 left-[80%] z-10 -translate-x-1/2 pointer-events-none flex flex-col">
+                            <span class="text-[10px] font-bold text-rose-500 bg-white px-1 leading-none pb-1">80%</span>
+                            <div class="w-px h-full border-l-2 border-dashed border-rose-300 mx-auto"></div>
+                        </div>
+
+                        <div class="mb-3 relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">วันนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-punyo-day-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-punyo-day-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3 relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">เดือนนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-punyo-month-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-punyo-month-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="relative z-0">
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-600">ปีงบนี้</span>
+                                <span class="text-emerald-600 font-bold"><span id="bar-punyo-year-txt">-</span>%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full transition-all duration-1000" id="bar-punyo-year-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Row 2: Occupancy Rate (Full Width) -->
+        <div class="glass-card rounded-2xl shadow-lg p-6 mb-6 hover:shadow-xl transition-shadow duration-300">
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="activity" class="w-6 h-6 text-brand-500"></i>
+                    อัตราครองเตียงรวม
+                </h2>
+                <p class="text-slate-500 text-sm mt-1">จำนวนเตียงรวม 42 เตียง (สามัญ + ปุญโญภาส)</p>
+            </div>
+            
+            <div class="relative pt-6 pb-2">
+                <!-- 80% Target Line -->
+                <div class="absolute top-0 bottom-0 left-[80%] z-10 -translate-x-1/2 pointer-events-none flex flex-col">
+                    <span class="text-xs font-bold text-rose-500 bg-white px-1 leading-none pb-1">80%</span>
+                    <div class="w-px h-full border-l-2 border-dashed border-rose-300 mx-auto"></div>
+                </div>
+
+                <div class="space-y-5 relative z-0">
+                    <div>
+                        <div class="flex justify-between text-sm font-medium mb-1">
+                            <span class="text-slate-600">วันนี้</span>
+                            <span class="text-emerald-600 font-bold"><span id="bar-total-day-txt">-</span>%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div class="bg-emerald-500 h-3 rounded-full transition-all duration-1000" id="bar-total-day-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm font-medium mb-1">
+                            <span class="text-slate-600">เดือนนี้</span>
+                            <span class="text-emerald-600 font-bold"><span id="bar-total-month-txt">-</span>%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div class="bg-emerald-500 h-3 rounded-full transition-all duration-1000" id="bar-total-month-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm font-medium mb-1">
+                            <span class="text-slate-600">ปีงบนี้</span>
+                            <span class="text-emerald-600 font-bold"><span id="bar-total-year-txt">-</span>%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3">
+                            <div class="bg-emerald-500 h-3 rounded-full transition-all duration-1000" id="bar-total-year-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: OPD Split (Left and Right) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Card 4: ผู้ป่วยนอกแยกตามสิทธิ (Left) -->
+            <div class="glass-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-6 h-6 text-purple-500"></i>
+                        ผู้ป่วยนอกแยกตามสิทธิ
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1 ml-8">ไม่รวมสิทธิ UC ในเขต</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-600 whitespace-nowrap">
+                        <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                            <tr>
+                                <th scope="col" class="px-3 py-2">สิทธิการรักษา</th>
+                                <th scope="col" class="px-3 py-2 text-center">วันนี้</th>
+                                <th scope="col" class="px-3 py-2 text-center">เดือนนี้</th>
+                                <th scope="col" class="px-3 py-2 text-center">ปีที่แล้ว</th>
+                                <th scope="col" class="px-3 py-2 text-center">+/-</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr>
+                                <td class="px-3 py-2">
+                                    <div>กรมบัญชีกลาง</div>
+                                    <div class="mt-1 bg-green-50 text-green-700 rounded-md px-2 py-1 text-xs inline-block">
+                                        EDC <span id="cgd-edc-count" class="font-bold">-</span> คน (<span id="cgd-edc-amount" class="font-bold">-</span> บาท)
+                                    </div>
+                                </td>
+                                <td id="cgd-day" class="px-3 py-2 text-center">-</td>
+                                <td id="cgd-month" class="px-3 py-2 text-center">-</td>
+                                <td id="cgd-year" class="px-3 py-2 text-center">-</td>
+                                <td id="cgd-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">
+                                    <div>เบิกได้ อปท.</div>
+                                    <div class="mt-1 bg-green-50 text-green-700 rounded-md px-2 py-1 text-xs inline-block">
+                                        ยอดเบิกวันนี้ <span id="dla-amount" class="font-bold">-</span> บาท
+                                    </div>
+                                </td>
+                                <td id="dla-day" class="px-3 py-2 text-center">-</td>
+                                <td id="dla-month" class="px-3 py-2 text-center">-</td>
+                                <td id="dla-year" class="px-3 py-2 text-center">-</td>
+                                <td id="dla-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ประกันสังคม</td>
+                                <td id="sso-day" class="px-3 py-2 text-center">-</td>
+                                <td id="sso-month" class="px-3 py-2 text-center">-</td>
+                                <td id="sso-year" class="px-3 py-2 text-center">-</td>
+                                <td id="sso-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">UC ต่างจังหวัดเรียกเก็บ</td>
+                                <td id="uc-out-day" class="px-3 py-2 text-center">-</td>
+                                <td id="uc-out-month" class="px-3 py-2 text-center">-</td>
+                                <td id="uc-out-year" class="px-3 py-2 text-center">-</td>
+                                <td id="uc-out-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">OP anywhere</td>
+                                <td id="op-any-day" class="px-3 py-2 text-center">-</td>
+                                <td id="op-any-month" class="px-3 py-2 text-center">-</td>
+                                <td id="op-any-year" class="px-3 py-2 text-center">-</td>
+                                <td id="op-any-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ใบรับรองแพทย์ชำระเงิน</td>
+                                <td id="med-cert-day" class="px-3 py-2 text-center">-</td>
+                                <td id="med-cert-month" class="px-3 py-2 text-center">-</td>
+                                <td id="med-cert-year" class="px-3 py-2 text-center">-</td>
+                                <td id="med-cert-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                            <tr>
+                                <td class="px-3 py-2">ชำระเงินเอง</td>
+                                <td id="self-pay-day" class="px-3 py-2 text-center">-</td>
+                                <td id="self-pay-month" class="px-3 py-2 text-center">-</td>
+                                <td id="self-pay-year" class="px-3 py-2 text-center">-</td>
+                                <td id="self-pay-pct" class="px-3 py-2 text-center font-medium">-</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="font-bold text-slate-800 bg-slate-50 border-t border-slate-200">
+                            <tr>
+                                <td class="px-3 py-3">รวมทั้งหมด</td>
+                                <td id="total-day" class="px-3 py-3 text-center">-</td>
+                                <td id="total-month" class="px-3 py-3 text-center">-</td>
+                                <td id="total-year" class="px-3 py-3 text-center">-</td>
+                                <td id="total-pct" class="px-3 py-3 text-center">-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Card 5: ผู้ป่วยนอกแยกตามบริการ (Right) -->
+            <div class="glass-card rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                <div class="mb-2">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="bar-chart-2" class="w-6 h-6 text-amber-500"></i>
+                        ผู้ป่วยนอกแยกตามบริการ
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1 ml-8">รวมทั้งสิ้น <span id="stat-opd-service-total" class="font-bold text-slate-700">-</span> ราย (เบิกได้ <span id="stat-opd-service-reimburse" class="font-bold text-slate-700">-</span> ประกันสังคม <span id="stat-opd-service-sso" class="font-bold text-slate-700">-</span>)</p>
+                </div>
+                
+                <!-- บริการย่อย 3 การ์ด -->
+                <div class="flex flex-col gap-3 mt-4">
+                    
+                    <!-- 1. กายภาพบำบัด -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                                    <i data-lucide="activity" class="w-5 h-5"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-700">กายภาพบำบัด</h3>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xs text-slate-500">รวม</span>
+                                <span id="pt-total" class="text-xl font-bold text-red-700">-</span>
+                                <span class="text-xs text-slate-500">ราย</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 text-sm ml-11">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="text-slate-500">เบิกได้</span>
+                                <span id="pt-reimburse" class="font-semibold text-slate-700">-</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-slate-500">ประกันสังคม</span>
+                                <span id="pt-sso" class="font-semibold text-slate-700">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. แพทย์แผนไทย -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                                    <i data-lucide="leaf" class="w-5 h-5"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-700">แพทย์แผนไทย</h3>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xs text-slate-500">รวม</span>
+                                <span id="tm-total" class="text-xl font-bold text-red-700">-</span>
+                                <span class="text-xs text-slate-500">ราย</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 text-sm ml-11">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="text-slate-500">เบิกได้</span>
+                                <span id="tm-reimburse" class="font-semibold text-slate-700">-</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-slate-500">ประกันสังคม</span>
+                                <span id="tm-sso" class="font-semibold text-slate-700">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. ทันตกรรม -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                                    <i data-lucide="smile" class="w-5 h-5"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-700">ทันตกรรม</h3>
+                            </div>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xs text-slate-500">รวม</span>
+                                <span id="den-total" class="text-xl font-bold text-red-700">-</span>
+                                <span class="text-xs text-slate-500">ราย</span>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 text-sm ml-11">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                <span class="text-slate-500">เบิกได้</span>
+                                <span id="den-reimburse" class="font-semibold text-slate-700">-</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span class="text-slate-500">ประกันสังคม</span>
+                                <span id="den-sso" class="font-semibold text-slate-700">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-300 py-6 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-sm font-light">&copy; 2026 โรงพยาบาลกุสุมาลย์ จังหวัดสกลนคร</p>
+            <div class="flex space-x-4">
+                <span class="text-xs text-slate-500 bg-slate-700 px-3 py-1 rounded-full">พัฒนาโดย: นายสมผล สังขะวรรณ</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Chart.js Global Config for Typography
+        Chart.defaults.font.family = "'Prompt', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // Google Sheet CSV URL
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQFCNo0Oom5iMLU4uUuup04Ml4CTxhNdobwQq5lv9QNgrartseKcPftdM5BWt4lEA30xn7_tkj8Fkxu/pub?gid=0&single=true&output=csv';
+
+        // --- Initial Mock Data ---
+        const mockData = {
+        };
+
+        // --- Render Charts Function ---
+        function renderCharts(data) {
+            // ฟังก์ชันนี้เก็บไว้เผื่ออนาคต หากมีการเพิ่มกราฟใหม่ (ปัจจุบันถูกลบกราฟ Chart.js ออกไปใช้ DOM แทนหมดแล้ว)
+        }
+
+        // --- Fetch and Process Google Sheets Data ---
+        function loadDashboardData() {
+            // Initial Render with Mock Data to prevent empty screen
+            renderCharts(mockData);
+
+            Papa.parse(sheetUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    const statusDot = document.getElementById('connection-status-dot');
+                    const statusText = document.getElementById('connection-status-text');
+
+                    if (results.data && results.data.length > 0) {
+                        console.log("เชื่อมต่อ Google Sheets สำเร็จ! (พบข้อมูล " + results.data.length + " แถว)");
+                        
+                        // ดึงข้อมูลจาก Google Sheet ช่อง B1 (เมื่อใช้ header: true ข้อมูลแถวที่ 1 จะอยู่ใน results.meta.fields)
+                        // B1 คือคอลัมน์ลำดับที่ 2 (index 1)
+                        const b1Value = (results.meta && results.meta.fields && results.meta.fields[1]) ? results.meta.fields[1] : 'ไม่ระบุวันที่';
+
+                        // อัปเดตสถานะ UI
+                        statusDot.classList.replace('bg-yellow-400', 'bg-green-400');
+                        statusDot.classList.remove('animate-pulse');
+                        statusText.textContent = 'ข้อมูล ณ ' + b1Value;
+                        statusText.classList.add('text-green-100');
+
+                        // ดึงข้อมูลการ์ด หอผู้ป่วยสามัญ และ หอผู้ป่วยปุญโญภาส
+                        // หมายเหตุ: เมื่อดึงข้อมูลแบบ header: true แถวที่ 1 จะไปอยู่ในหัวตาราง, แถวที่ 2 คือ index 0, แถวที่ 4 คือ index 2, ฯลฯ
+                        if (results.data.length >= 9) {
+                            // ใช้ Object.values()[1] เพื่อดึงข้อมูลคอลัมน์ที่ 2 (Column B)
+                            const b2Value = Object.values(results.data[0])[1] || '0'; // Row 2
+                            const b4Value = Object.values(results.data[2])[1] || '0'; // Row 4
+                            const b5Value = Object.values(results.data[3])[1] || '0'; // Row 5
+                            const b8Value = Object.values(results.data[6])[1] || '0'; // Row 8
+                            const b9Value = Object.values(results.data[7])[1] || '0'; // Row 9
+                            const b10Value = Object.values(results.data[8])[1] || '0'; // Row 10
+
+                            document.getElementById('stat-general-new').textContent = b2Value;
+                            document.getElementById('stat-general-total').textContent = b4Value;
+                            document.getElementById('stat-general-today').textContent = b5Value;
+                            
+                            // คำนวณเปอร์เซ็นต์ หอผู้ป่วยสามัญ (เป้า 360 ราย)
+                            const genTotal = parseInt(b4Value.replace(/,/g, '')) || 0;
+                            document.getElementById('stat-general-percent').textContent = ((genTotal / 360) * 100).toFixed(1);
+                            
+                            document.getElementById('stat-punyo-new').textContent = b8Value;
+                            document.getElementById('stat-punyo-total').textContent = b9Value;
+                            document.getElementById('stat-punyo-today').textContent = b10Value;
+
+                            // คำนวณเปอร์เซ็นต์ หอผู้ป่วยปุญโญภาส (เป้า 60 ราย)
+                            const punyoTotal = parseInt(b9Value.replace(/,/g, '')) || 0;
+                            document.getElementById('stat-punyo-percent').textContent = ((punyoTotal / 60) * 100).toFixed(1);
+
+                            // --- ฟังก์ชันเสริม: ช่วยดึงข้อมูลและแปลงเป็นตัวเลขเพื่อคำนวณกราฟ ---
+                            const getNum = (rowIndex) => {
+                                if (results.data[rowIndex]) {
+                                    const val = Object.values(results.data[rowIndex])[1];
+                                    if(val) return parseFloat(val.toString().replace(/,/g, '')) || 0;
+                                }
+                                return 0;
+                            };
+
+                            // คำนวณกราฟแท่งแนวนอน - หอผู้ป่วยสามัญ
+                            const b5Num = getNum(3); // แถวที่ 5 (index 3)
+                            const b6Num = getNum(4); // แถวที่ 6 (index 4)
+                            const b7Num = getNum(5); // แถวที่ 7 (index 5)
+                            const b50Num = getNum(48) || 1; // แถวที่ 50 (index 48) - กันหาร 0
+                            const b51Num = getNum(49) || 1; // แถวที่ 51 (index 49) - กันหาร 0
+
+                            const genDayPct = ((b5Num * 100) / 36).toFixed(1);
+                            const genMonthPct = ((b6Num * 100) / b50Num).toFixed(1);
+                            const genYearPct = ((b7Num * 100) / b51Num).toFixed(1);
+
+                            document.getElementById('bar-gen-day-txt').textContent = genDayPct;
+                            document.getElementById('bar-gen-day-fill').style.width = Math.min(genDayPct, 100) + '%';
+                            
+                            document.getElementById('bar-gen-month-txt').textContent = genMonthPct;
+                            document.getElementById('bar-gen-month-fill').style.width = Math.min(genMonthPct, 100) + '%';
+                            
+                            document.getElementById('bar-gen-year-txt').textContent = genYearPct;
+                            document.getElementById('bar-gen-year-fill').style.width = Math.min(genYearPct, 100) + '%';
+
+                            // คำนวณกราฟแท่งแนวนอน - หอผู้ป่วยปุญโญภาส
+                            const b10Num = getNum(8);  // แถวที่ 10 (index 8)
+                            const b11Num = getNum(9);  // แถวที่ 11 (index 9)
+                            const b12Num = getNum(10); // แถวที่ 12 (index 10)
+                            const b52Num = getNum(50) || 1; // แถวที่ 52 (index 50) - กันหาร 0
+                            const b53Num = getNum(51) || 1; // แถวที่ 53 (index 51) - กันหาร 0
+
+                            const punDayPct = ((b10Num * 100) / 6).toFixed(1);
+                            const punMonthPct = ((b11Num * 100) / b52Num).toFixed(1);
+                            const punYearPct = ((b12Num * 100) / b53Num).toFixed(1);
+
+                            document.getElementById('bar-punyo-day-txt').textContent = punDayPct;
+                            document.getElementById('bar-punyo-day-fill').style.width = Math.min(punDayPct, 100) + '%';
+                            
+                            document.getElementById('bar-punyo-month-txt').textContent = punMonthPct;
+                            document.getElementById('bar-punyo-month-fill').style.width = Math.min(punMonthPct, 100) + '%';
+                            
+                            document.getElementById('bar-punyo-year-txt').textContent = punYearPct;
+                            document.getElementById('bar-punyo-year-fill').style.width = Math.min(punYearPct, 100) + '%';
+
+                            // คำนวณกราฟแท่งแนวนอน - อัตราครองเตียงรวม
+                            const b54Num = getNum(52) || 1; // แถวที่ 54 (index 52) - กันหาร 0
+                            const b55Num = getNum(53) || 1; // แถวที่ 55 (index 53) - กันหาร 0
+
+                            const totalDayPct = (((b5Num + b10Num) * 100) / 42).toFixed(1);
+                            const totalMonthPct = (((b6Num + b11Num) * 100) / b54Num).toFixed(1);
+                            const totalYearPct = (((b7Num + b12Num) * 100) / b55Num).toFixed(1);
+
+                            document.getElementById('bar-total-day-txt').textContent = totalDayPct;
+                            document.getElementById('bar-total-day-fill').style.width = Math.min(totalDayPct, 100) + '%';
+                            
+                            document.getElementById('bar-total-month-txt').textContent = totalMonthPct;
+                            document.getElementById('bar-total-month-fill').style.width = Math.min(totalMonthPct, 100) + '%';
+                            
+                            document.getElementById('bar-total-year-txt').textContent = totalYearPct;
+                            document.getElementById('bar-total-year-fill').style.width = Math.min(totalYearPct, 100) + '%';
+
+                            // คำนวณผู้ป่วยนอกแยกตามบริการ (ยอดรวม B37 + B40 + B43)
+                            // index = หมายเลขแถว - 2 (เพราะแถวที่ 1 เป็น Header)
+                            const b37Num = getNum(35); // แถวที่ 37 (ยอดรวมกายภาพ)
+                            const b40Num = getNum(38); // แถวที่ 40 (ยอดรวมแผนไทย)
+                            const b43Num = getNum(41); // แถวที่ 43 (ยอดรวมทันตกรรม)
+                            
+                            const b38Num = getNum(36); // B38 (เบิกได้ กายภาพ)
+                            const b41Num = getNum(39); // B41 (เบิกได้ แผนไทย)
+                            const b44Num = getNum(42); // B44 (เบิกได้ ทันตกรรม)
+                            
+                            const b39Num = getNum(37); // B39 (ประกันสังคม กายภาพ)
+                            const b42Num = getNum(40); // B42 (ประกันสังคม แผนไทย)
+                            const b45Num = getNum(43); // B45 (ประกันสังคม ทันตกรรม)
+                            
+                            const totalOpdService = b37Num + b40Num + b43Num;
+                            const totalOpdReimburse = b38Num + b41Num + b44Num;
+                            const totalOpdSso = b39Num + b42Num + b45Num;
+
+                            const opdTotalEl = document.getElementById('stat-opd-service-total');
+                            if (opdTotalEl) {
+                                // ใช้ toLocaleString() เพื่อใส่ลูกน้ำคั่นหลักพัน
+                                opdTotalEl.textContent = totalOpdService.toLocaleString();
+                            }
+                            const opdReimburseEl = document.getElementById('stat-opd-service-reimburse');
+                            if (opdReimburseEl) opdReimburseEl.textContent = totalOpdReimburse.toLocaleString();
+                            
+                            const opdSsoEl = document.getElementById('stat-opd-service-sso');
+                            if (opdSsoEl) opdSsoEl.textContent = totalOpdSso.toLocaleString();
+
+                            // ข้อมูลผู้ป่วยนอกแยกตามบริการรายแผนก (3 การ์ดย่อย)
+                            // 1. กายภาพบำบัด
+                            document.getElementById('pt-total').textContent = b37Num.toLocaleString();
+                            document.getElementById('pt-reimburse').textContent = b38Num.toLocaleString(); // B38
+                            document.getElementById('pt-sso').textContent = b39Num.toLocaleString(); // B39
+
+                            // 2. แพทย์แผนไทย
+                            document.getElementById('tm-total').textContent = b40Num.toLocaleString();
+                            document.getElementById('tm-reimburse').textContent = b41Num.toLocaleString(); // B41
+                            document.getElementById('tm-sso').textContent = b42Num.toLocaleString(); // B42
+
+                            // 3. ทันตกรรม
+                            document.getElementById('den-total').textContent = b43Num.toLocaleString();
+                            document.getElementById('den-reimburse').textContent = b44Num.toLocaleString(); // B44
+                            document.getElementById('den-sso').textContent = b45Num.toLocaleString(); // B45
+
+
+                            // คำนวณตาราง ผู้ป่วยนอกแยกตามสิทธิ
+                            const calcPctChange = (monthVal, yearVal) => {
+                                if (yearVal === 0 && monthVal === 0) return { text: '0.0%', color: 'text-slate-500' };
+                                if (yearVal === 0) return { text: '+100.0%', color: 'text-emerald-600' }; // กรณีปีที่แล้วเป็น 0 แต่เดือนนี้มีข้อมูล
+                                const pct = ((monthVal - yearVal) / yearVal) * 100;
+                                if (pct > 0) return { text: '+' + pct.toFixed(1) + '%', color: 'text-emerald-600' };
+                                if (pct < 0) return { text: pct.toFixed(1) + '%', color: 'text-red-700' };
+                                return { text: '0.0%', color: 'text-slate-500' };
+                            };
+
+                            const tableRows = [
+                                { id: 'cgd', dayIdx: 11, monthIdx: 12, yearIdx: 13 },       // B13-B15 กรมบัญชีกลาง
+                                { id: 'dla', dayIdx: 16, monthIdx: 17, yearIdx: 18 },       // B18-B20 เบิกได้ อปท.
+                                { id: 'sso', dayIdx: 20, monthIdx: 21, yearIdx: 22 },       // B22-B24 ประกันสังคม
+                                { id: 'uc-out', dayIdx: 23, monthIdx: 24, yearIdx: 25 },    // B25-B27 UC ต่างจังหวัดเรียกเก็บ
+                                { id: 'op-any', dayIdx: 26, monthIdx: 27, yearIdx: 28 },    // B28-B30 OP anywhere
+                                { id: 'med-cert', dayIdx: 29, monthIdx: 30, yearIdx: 31 },  // B31-B33 ใบรับรองแพทย์ชำระเงิน
+                                { id: 'self-pay', dayIdx: 32, monthIdx: 33, yearIdx: 34 }   // B34-B36 ชำระเงินเอง
+                            ];
+
+                            let sumDay = 0, sumMonth = 0, sumYear = 0;
+
+                            tableRows.forEach(row => {
+                                const dayVal = getNum(row.dayIdx);
+                                const monthVal = getNum(row.monthIdx);
+                                const yearVal = getNum(row.yearIdx);
+
+                                sumDay += dayVal;
+                                sumMonth += monthVal;
+                                sumYear += yearVal;
+
+                                document.getElementById(`${row.id}-day`).textContent = dayVal.toLocaleString();
+                                document.getElementById(`${row.id}-month`).textContent = monthVal.toLocaleString();
+                                document.getElementById(`${row.id}-year`).textContent = yearVal.toLocaleString();
+
+                                const pctObj = calcPctChange(monthVal, yearVal);
+                                const pctEl = document.getElementById(`${row.id}-pct`);
+                                pctEl.textContent = pctObj.text;
+                                pctEl.className = `px-3 py-2 text-center font-medium ${pctObj.color}`;
+                            });
+
+                            // อัปเดตแถว รวมทั้งหมด
+                            document.getElementById('total-day').textContent = sumDay.toLocaleString();
+                            document.getElementById('total-month').textContent = sumMonth.toLocaleString();
+                            document.getElementById('total-year').textContent = sumYear.toLocaleString();
+                            
+                            const totalPctObj = calcPctChange(sumMonth, sumYear);
+                            const totalPctEl = document.getElementById('total-pct');
+                            totalPctEl.textContent = totalPctObj.text;
+                            totalPctEl.className = `px-3 py-3 text-center font-bold ${totalPctObj.color}`;
+
+                            // ข้อมูลเสริมข้อความรอง (กรมบัญชีกลาง และ เบิกได้ อปท.)
+                            document.getElementById('cgd-edc-count').textContent = getNum(14).toLocaleString(); // แถว 16 (B16)
+                            document.getElementById('cgd-edc-amount').textContent = getNum(15).toLocaleString(); // แถว 17 (B17)
+                            document.getElementById('dla-amount').textContent = getNum(19).toLocaleString(); // แถว 21 (B21)
+                        }
+
+                        /* เนื่องจากไม่ทราบโครงสร้าง Column ใน Google Sheets ที่แน่ชัด 
+                           หากต้องการให้กราฟอัปเดตตามไฟล์ Google Sheets จริง 
+                           ให้เขียนโค้ด Map ข้อมูลจาก `results.data` เข้ามาแทนที่ตัวแปร mockData ด้านบนได้ที่นี่
+                           ตัวอย่าง: 
+                           let latestRow = results.data[results.data.length - 1];
+                           document.getElementById('stat-general').textContent = latestRow['หอผู้ป่วยสามัญ'] || '0';
+                        */
+                       
+                       // For demonstration, we keep displaying the beautifully structured Mock Data
+                       // but the system successfully proves it can fetch the CSV.
+                    } else {
+                        throw new Error("ไม่พบข้อมูลใน Sheet");
+                    }
+                },
+                error: function(err) {
+                    console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", err);
+                    const statusDot = document.getElementById('connection-status-dot');
+                    const statusText = document.getElementById('connection-status-text');
+                    
+                    statusDot.classList.replace('bg-yellow-400', 'bg-red-500');
+                    statusDot.classList.remove('animate-pulse');
+                    statusText.textContent = 'แสดงข้อมูลจำลอง';
+                    statusText.classList.add('text-red-100');
+                }
+            });
+        }
+
+        // Start loading when page is ready
+        window.addEventListener('DOMContentLoaded', loadDashboardData);
+
+    </script>
+</body>
+</html>
