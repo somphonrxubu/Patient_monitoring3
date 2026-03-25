@@ -318,7 +318,12 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr>
-                                <td class="px-3 py-2">กรมบัญชีกลาง</td>
+                                <td class="px-3 py-2">
+                                    <div>กรมบัญชีกลาง</div>
+                                    <div class="mt-1 bg-green-50 text-green-700 rounded-md px-2 py-1 text-[11px] inline-block font-medium">
+                                        EDC <span id="cgd-edc-count" class="font-bold">-</span> คน (<span id="cgd-edc-cost" class="font-bold">-</span> บาท)
+                                    </div>
+                                </td>
                                 <td id="cgd-day" class="px-3 py-2 text-center">-</td>
                                 <td id="cgd-month" class="px-3 py-2 text-center">-</td>
                                 <td id="cgd-year" class="px-3 py-2 text-center">-</td>
@@ -441,7 +446,10 @@
                         <i data-lucide="banknote" class="w-6 h-6 text-emerald-500"></i>
                         ค่ารักษาพยาบาลแยกตามสิทธิ
                     </h2>
-                    <p class="text-slate-500 text-sm mt-1 ml-8">รวมค่ารักษาพยาบาล <span id="stat-cost-total" class="font-bold text-slate-700">-</span> บาท</p>
+                    <div class="flex items-center gap-2 mt-1 ml-8 flex-wrap">
+                        <p class="text-slate-500 text-sm">รวม <span id="stat-cost-total" class="font-bold text-emerald-700">-</span> บาท <span class="text-xs">(เป้าหมาย 40,000 บาท/วัน)</span></p>
+                        <div id="cost-target-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold"></div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -449,7 +457,7 @@
                     <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
                         <h3 class="font-bold text-slate-700 text-sm mb-1">กรมบัญชีกลาง</h3>
                         <div class="flex items-baseline justify-center gap-1 mb-2">
-                            <span id="cost-cgd" class="text-2xl font-bold text-slate-800">-</span>
+                            <span id="cost-cgd" class="text-2xl font-bold text-emerald-700">-</span>
                             <span class="text-xs text-slate-500">บาท</span>
                         </div>
                         <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
@@ -465,7 +473,7 @@
                     <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
                         <h3 class="font-bold text-slate-700 text-sm mb-1">เบิกได้ อปท.</h3>
                         <div class="flex items-baseline justify-center gap-1 mb-2">
-                            <span id="cost-dla" class="text-2xl font-bold text-slate-800">-</span>
+                            <span id="cost-dla" class="text-2xl font-bold text-emerald-700">-</span>
                             <span class="text-xs text-slate-500">บาท</span>
                         </div>
                         <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
@@ -481,7 +489,7 @@
                     <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
                         <h3 class="font-bold text-slate-700 text-sm mb-1">ชำระเงินเอง</h3>
                         <div class="flex items-baseline justify-center gap-1 mb-2">
-                            <span id="cost-self" class="text-2xl font-bold text-slate-800">-</span>
+                            <span id="cost-self" class="text-2xl font-bold text-emerald-700">-</span>
                             <span class="text-xs text-slate-500">บาท</span>
                         </div>
                         <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
@@ -703,6 +711,21 @@
                             const costTotalEl = document.getElementById('stat-cost-total');
                             if (costTotalEl) costTotalEl.textContent = totalCost.toLocaleString();
 
+                            // ประเมินเป้าหมาย 40,000 บาท/วัน
+                            const targetBadge = document.getElementById('cost-target-badge');
+                            if (targetBadge) {
+                                targetBadge.classList.remove('hidden');
+                                if (totalCost >= 40000) {
+                                    targetBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-green-100 text-green-700';
+                                    targetBadge.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> บรรลุเป้าหมาย';
+                                } else {
+                                    targetBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-red-100 text-red-700';
+                                    targetBadge.innerHTML = '<i data-lucide="x" class="w-3.5 h-3.5"></i> ต่ำกว่าเป้าหมาย';
+                                }
+                                // เรียกฟังก์ชันอัปเดตไอคอนเฉพาะส่วนของ Badge นี้
+                                lucide.createIcons({ root: targetBadge });
+                            }
+
                             document.getElementById('cost-cgd').textContent = costCgd.toLocaleString();
                             document.getElementById('cost-dla').textContent = costDla.toLocaleString();
                             document.getElementById('cost-self').textContent = costSelf.toLocaleString();
@@ -712,6 +735,12 @@
                             document.getElementById('count-dla').textContent = getNum(16).toLocaleString(); // แถว 18 (B18)
                             document.getElementById('count-self').textContent = getNum(32).toLocaleString(); // แถว 34 (B34)
 
+                            // ข้อมูลรอง EDC กรมบัญชีกลาง (B16, B17)
+                            const cgdEdcCountEl = document.getElementById('cgd-edc-count');
+                            if (cgdEdcCountEl) cgdEdcCountEl.textContent = getNum(14).toLocaleString(); // แถว 16 (B16)
+                            
+                            const cgdEdcCostEl = document.getElementById('cgd-edc-cost');
+                            if (cgdEdcCostEl) cgdEdcCostEl.textContent = getNum(15).toLocaleString(); // แถว 17 (B17)
 
                             // คำนวณตาราง ผู้ป่วยนอกแยกตามสิทธิ
                             const calcPctChange = (monthVal, yearVal) => {
