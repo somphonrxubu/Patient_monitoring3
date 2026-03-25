@@ -318,24 +318,14 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             <tr>
-                                <td class="px-3 py-2">
-                                    <div>กรมบัญชีกลาง</div>
-                                    <div class="mt-1 bg-green-50 text-green-700 rounded-md px-2 py-1 text-xs inline-block">
-                                        EDC <span id="cgd-edc-count" class="font-bold">-</span> คน (<span id="cgd-edc-amount" class="font-bold">-</span> บาท)
-                                    </div>
-                                </td>
+                                <td class="px-3 py-2">กรมบัญชีกลาง</td>
                                 <td id="cgd-day" class="px-3 py-2 text-center">-</td>
                                 <td id="cgd-month" class="px-3 py-2 text-center">-</td>
                                 <td id="cgd-year" class="px-3 py-2 text-center">-</td>
                                 <td id="cgd-pct" class="px-3 py-2 text-center font-medium">-</td>
                             </tr>
                             <tr>
-                                <td class="px-3 py-2">
-                                    <div>เบิกได้ อปท.</div>
-                                    <div class="mt-1 bg-green-50 text-green-700 rounded-md px-2 py-1 text-xs inline-block">
-                                        ยอดเบิกวันนี้ <span id="dla-amount" class="font-bold">-</span> บาท
-                                    </div>
-                                </td>
+                                <td class="px-3 py-2">เบิกได้ อปท.</td>
                                 <td id="dla-day" class="px-3 py-2 text-center">-</td>
                                 <td id="dla-month" class="px-3 py-2 text-center">-</td>
                                 <td id="dla-year" class="px-3 py-2 text-center">-</td>
@@ -400,97 +390,110 @@
                     <p class="text-slate-500 text-sm mt-1 ml-8">รวมทั้งสิ้น <span id="stat-opd-service-total" class="font-bold text-slate-700">-</span> ราย (เบิกได้ <span id="stat-opd-service-reimburse" class="font-bold text-slate-700">-</span> ประกันสังคม <span id="stat-opd-service-sso" class="font-bold text-slate-700">-</span>)</p>
                 </div>
                 
-                <!-- บริการย่อย 3 การ์ด -->
-                <div class="flex flex-col gap-3 mt-4">
+                <!-- บริการย่อย 3 การ์ด (เรียงซ้ายไปขวา) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                     
                     <!-- 1. กายภาพบำบัด -->
-                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                    <i data-lucide="activity" class="w-5 h-5"></i>
-                                </div>
-                                <h3 class="font-bold text-slate-700">กายภาพบำบัด</h3>
-                            </div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-xs text-slate-500">รวม</span>
-                                <span id="pt-total" class="text-xl font-bold text-red-700">-</span>
-                                <span class="text-xs text-slate-500">ราย</span>
-                            </div>
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">กายภาพบำบัด</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="pt-total" class="text-4xl font-bold text-red-700">-</span>
+                            <span class="text-xs text-slate-500">ราย</span>
                         </div>
-                        <div class="flex gap-4 text-sm ml-11">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                <span class="text-slate-500">เบิกได้</span>
-                                <span id="pt-reimburse" class="font-semibold text-slate-700">-</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                <span class="text-slate-500">ประกันสังคม</span>
-                                <span id="pt-sso" class="font-semibold text-slate-700">-</span>
-                            </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex flex-col items-center gap-1">
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1"></span>เบิกได้ <span id="pt-reimburse" class="font-semibold text-slate-700 ml-1">-</span></div>
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1"></span>ประกันสังคม <span id="pt-sso" class="font-semibold text-slate-700 ml-1">-</span></div>
                         </div>
                     </div>
 
                     <!-- 2. แพทย์แผนไทย -->
-                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
-                                    <i data-lucide="leaf" class="w-5 h-5"></i>
-                                </div>
-                                <h3 class="font-bold text-slate-700">แพทย์แผนไทย</h3>
-                            </div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-xs text-slate-500">รวม</span>
-                                <span id="tm-total" class="text-xl font-bold text-red-700">-</span>
-                                <span class="text-xs text-slate-500">ราย</span>
-                            </div>
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">แพทย์แผนไทย</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="tm-total" class="text-4xl font-bold text-red-700">-</span>
+                            <span class="text-xs text-slate-500">ราย</span>
                         </div>
-                        <div class="flex gap-4 text-sm ml-11">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                <span class="text-slate-500">เบิกได้</span>
-                                <span id="tm-reimburse" class="font-semibold text-slate-700">-</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                <span class="text-slate-500">ประกันสังคม</span>
-                                <span id="tm-sso" class="font-semibold text-slate-700">-</span>
-                            </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex flex-col items-center gap-1">
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1"></span>เบิกได้ <span id="tm-reimburse" class="font-semibold text-slate-700 ml-1">-</span></div>
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1"></span>ประกันสังคม <span id="tm-sso" class="font-semibold text-slate-700 ml-1">-</span></div>
                         </div>
                     </div>
 
                     <!-- 3. ทันตกรรม -->
-                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-4 hover:bg-slate-100 transition-colors duration-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                                    <i data-lucide="smile" class="w-5 h-5"></i>
-                                </div>
-                                <h3 class="font-bold text-slate-700">ทันตกรรม</h3>
-                            </div>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-xs text-slate-500">รวม</span>
-                                <span id="den-total" class="text-xl font-bold text-red-700">-</span>
-                                <span class="text-xs text-slate-500">ราย</span>
-                            </div>
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">ทันตกรรม</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="den-total" class="text-4xl font-bold text-red-700">-</span>
+                            <span class="text-xs text-slate-500">ราย</span>
                         </div>
-                        <div class="flex gap-4 text-sm ml-11">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                <span class="text-slate-500">เบิกได้</span>
-                                <span id="den-reimburse" class="font-semibold text-slate-700">-</span>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                <span class="text-slate-500">ประกันสังคม</span>
-                                <span id="den-sso" class="font-semibold text-slate-700">-</span>
-                            </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex flex-col items-center gap-1">
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1"></span>เบิกได้ <span id="den-reimburse" class="font-semibold text-slate-700 ml-1">-</span></div>
+                            <div class="flex items-center"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 mr-1"></span>ประกันสังคม <span id="den-sso" class="font-semibold text-slate-700 ml-1">-</span></div>
                         </div>
                     </div>
 
                 </div>
+
+                <!-- NEW: ค่ารักษาพยาบาลแยกตามสิทธิ -->
+                <hr class="mt-6 mb-2 border-slate-100">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i data-lucide="banknote" class="w-6 h-6 text-emerald-500"></i>
+                        ค่ารักษาพยาบาลแยกตามสิทธิ
+                    </h2>
+                    <p class="text-slate-500 text-sm mt-1 ml-8">รวมค่ารักษาพยาบาล <span id="stat-cost-total" class="font-bold text-slate-700">-</span> บาท</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- 1. กรมบัญชีกลาง -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">กรมบัญชีกลาง</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="cost-cgd" class="text-2xl font-bold text-slate-800">-</span>
+                            <span class="text-xs text-slate-500">บาท</span>
+                        </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
+                            <div class="flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>
+                                <span id="count-cgd" class="font-semibold text-slate-700">-</span>
+                                <span class="ml-1">คน</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. เบิกได้ อปท. -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">เบิกได้ อปท.</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="cost-dla" class="text-2xl font-bold text-slate-800">-</span>
+                            <span class="text-xs text-slate-500">บาท</span>
+                        </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
+                            <div class="flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>
+                                <span id="count-dla" class="font-semibold text-slate-700">-</span>
+                                <span class="ml-1">คน</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. ชำระเงินเอง -->
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3 hover:bg-slate-100 transition-colors duration-200 text-center flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-700 text-sm mb-1">ชำระเงินเอง</h3>
+                        <div class="flex items-baseline justify-center gap-1 mb-2">
+                            <span id="cost-self" class="text-2xl font-bold text-slate-800">-</span>
+                            <span class="text-xs text-slate-500">บาท</span>
+                        </div>
+                        <div class="text-[11px] lg:text-xs text-slate-500 flex justify-center">
+                            <div class="flex items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>
+                                <span id="count-self" class="font-semibold text-slate-700">-</span>
+                                <span class="ml-1">คน</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -501,7 +504,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p class="text-sm font-light">&copy; 2026 โรงพยาบาลกุสุมาลย์ จังหวัดสกลนคร</p>
             <div class="flex space-x-4">
-                <span class="text-xs text-slate-500 bg-slate-700 px-3 py-1 rounded-full">พัฒนาโดย: นายสมผล สังขะวรรณ</span>
+                <span class="text-xs text-slate-500 bg-slate-700 px-3 py-1 rounded-full">ที่มา : งานเวชระเบียน</span>
             </div>
         </div>
     </footer>
@@ -593,12 +596,12 @@
                             const b5Num = getNum(3); // แถวที่ 5 (index 3)
                             const b6Num = getNum(4); // แถวที่ 6 (index 4)
                             const b7Num = getNum(5); // แถวที่ 7 (index 5)
-                            const b50Num = getNum(48) || 1; // แถวที่ 50 (index 48) - กันหาร 0
                             const b51Num = getNum(49) || 1; // แถวที่ 51 (index 49) - กันหาร 0
+                            const b52Num = getNum(50) || 1; // แถวที่ 52 (index 50) - กันหาร 0
 
                             const genDayPct = ((b5Num * 100) / 36).toFixed(1);
-                            const genMonthPct = ((b6Num * 100) / b50Num).toFixed(1);
-                            const genYearPct = ((b7Num * 100) / b51Num).toFixed(1);
+                            const genMonthPct = ((b6Num * 100) / b51Num).toFixed(1);
+                            const genYearPct = ((b7Num * 100) / b52Num).toFixed(1);
 
                             document.getElementById('bar-gen-day-txt').textContent = genDayPct;
                             document.getElementById('bar-gen-day-fill').style.width = Math.min(genDayPct, 100) + '%';
@@ -613,12 +616,12 @@
                             const b10Num = getNum(8);  // แถวที่ 10 (index 8)
                             const b11Num = getNum(9);  // แถวที่ 11 (index 9)
                             const b12Num = getNum(10); // แถวที่ 12 (index 10)
-                            const b52Num = getNum(50) || 1; // แถวที่ 52 (index 50) - กันหาร 0
                             const b53Num = getNum(51) || 1; // แถวที่ 53 (index 51) - กันหาร 0
+                            const b54Num = getNum(52) || 1; // แถวที่ 54 (index 52) - กันหาร 0
 
                             const punDayPct = ((b10Num * 100) / 6).toFixed(1);
-                            const punMonthPct = ((b11Num * 100) / b52Num).toFixed(1);
-                            const punYearPct = ((b12Num * 100) / b53Num).toFixed(1);
+                            const punMonthPct = ((b11Num * 100) / b53Num).toFixed(1);
+                            const punYearPct = ((b12Num * 100) / b54Num).toFixed(1);
 
                             document.getElementById('bar-punyo-day-txt').textContent = punDayPct;
                             document.getElementById('bar-punyo-day-fill').style.width = Math.min(punDayPct, 100) + '%';
@@ -630,12 +633,12 @@
                             document.getElementById('bar-punyo-year-fill').style.width = Math.min(punYearPct, 100) + '%';
 
                             // คำนวณกราฟแท่งแนวนอน - อัตราครองเตียงรวม
-                            const b54Num = getNum(52) || 1; // แถวที่ 54 (index 52) - กันหาร 0
                             const b55Num = getNum(53) || 1; // แถวที่ 55 (index 53) - กันหาร 0
+                            const b56Num = getNum(54) || 1; // แถวที่ 56 (index 54) - กันหาร 0
 
                             const totalDayPct = (((b5Num + b10Num) * 100) / 42).toFixed(1);
-                            const totalMonthPct = (((b6Num + b11Num) * 100) / b54Num).toFixed(1);
-                            const totalYearPct = (((b7Num + b12Num) * 100) / b55Num).toFixed(1);
+                            const totalMonthPct = (((b6Num + b11Num) * 100) / b55Num).toFixed(1);
+                            const totalYearPct = (((b7Num + b12Num) * 100) / b56Num).toFixed(1);
 
                             document.getElementById('bar-total-day-txt').textContent = totalDayPct;
                             document.getElementById('bar-total-day-fill').style.width = Math.min(totalDayPct, 100) + '%';
@@ -646,29 +649,27 @@
                             document.getElementById('bar-total-year-txt').textContent = totalYearPct;
                             document.getElementById('bar-total-year-fill').style.width = Math.min(totalYearPct, 100) + '%';
 
-                            // คำนวณผู้ป่วยนอกแยกตามบริการ (ยอดรวม B37 + B40 + B43)
+                            // คำนวณผู้ป่วยนอกแยกตามบริการ (ยอดรวม B38, B41, B44)
                             // index = หมายเลขแถว - 2 (เพราะแถวที่ 1 เป็น Header)
-                            const b37Num = getNum(35); // แถวที่ 37 (ยอดรวมกายภาพ)
-                            const b40Num = getNum(38); // แถวที่ 40 (ยอดรวมแผนไทย)
-                            const b43Num = getNum(41); // แถวที่ 43 (ยอดรวมทันตกรรม)
+                            const b38Num = getNum(36); // B38 (รวม กายภาพ)
+                            const b39Num = getNum(37); // B39 (เบิกได้ กายภาพ)
+                            const b40Num = getNum(38); // B40 (ประกันสังคม กายภาพ)
                             
-                            const b38Num = getNum(36); // B38 (เบิกได้ กายภาพ)
-                            const b41Num = getNum(39); // B41 (เบิกได้ แผนไทย)
-                            const b44Num = getNum(42); // B44 (เบิกได้ ทันตกรรม)
+                            const b41Num = getNum(39); // B41 (รวม แผนไทย)
+                            const b42Num = getNum(40); // B42 (เบิกได้ แผนไทย)
+                            const b43Num = getNum(41); // B43 (ประกันสังคม แผนไทย)
                             
-                            const b39Num = getNum(37); // B39 (ประกันสังคม กายภาพ)
-                            const b42Num = getNum(40); // B42 (ประกันสังคม แผนไทย)
-                            const b45Num = getNum(43); // B45 (ประกันสังคม ทันตกรรม)
+                            const b44Num = getNum(42); // B44 (รวม ทันตกรรม)
+                            const b45Num = getNum(43); // B45 (เบิกได้ ทันตกรรม)
+                            const b46Num = getNum(44); // B46 (ประกันสังคม ทันตกรรม)
                             
-                            const totalOpdService = b37Num + b40Num + b43Num;
-                            const totalOpdReimburse = b38Num + b41Num + b44Num;
-                            const totalOpdSso = b39Num + b42Num + b45Num;
+                            const totalOpdService = b38Num + b41Num + b44Num;
+                            const totalOpdReimburse = b39Num + b42Num + b45Num;
+                            const totalOpdSso = b40Num + b43Num + b46Num;
 
                             const opdTotalEl = document.getElementById('stat-opd-service-total');
-                            if (opdTotalEl) {
-                                // ใช้ toLocaleString() เพื่อใส่ลูกน้ำคั่นหลักพัน
-                                opdTotalEl.textContent = totalOpdService.toLocaleString();
-                            }
+                            if (opdTotalEl) opdTotalEl.textContent = totalOpdService.toLocaleString();
+                            
                             const opdReimburseEl = document.getElementById('stat-opd-service-reimburse');
                             if (opdReimburseEl) opdReimburseEl.textContent = totalOpdReimburse.toLocaleString();
                             
@@ -677,19 +678,39 @@
 
                             // ข้อมูลผู้ป่วยนอกแยกตามบริการรายแผนก (3 การ์ดย่อย)
                             // 1. กายภาพบำบัด
-                            document.getElementById('pt-total').textContent = b37Num.toLocaleString();
-                            document.getElementById('pt-reimburse').textContent = b38Num.toLocaleString(); // B38
-                            document.getElementById('pt-sso').textContent = b39Num.toLocaleString(); // B39
+                            document.getElementById('pt-total').textContent = b38Num.toLocaleString();
+                            document.getElementById('pt-reimburse').textContent = b39Num.toLocaleString();
+                            document.getElementById('pt-sso').textContent = b40Num.toLocaleString();
 
                             // 2. แพทย์แผนไทย
-                            document.getElementById('tm-total').textContent = b40Num.toLocaleString();
-                            document.getElementById('tm-reimburse').textContent = b41Num.toLocaleString(); // B41
-                            document.getElementById('tm-sso').textContent = b42Num.toLocaleString(); // B42
+                            document.getElementById('tm-total').textContent = b41Num.toLocaleString();
+                            document.getElementById('tm-reimburse').textContent = b42Num.toLocaleString();
+                            document.getElementById('tm-sso').textContent = b43Num.toLocaleString();
 
                             // 3. ทันตกรรม
-                            document.getElementById('den-total').textContent = b43Num.toLocaleString();
-                            document.getElementById('den-reimburse').textContent = b44Num.toLocaleString(); // B44
-                            document.getElementById('den-sso').textContent = b45Num.toLocaleString(); // B45
+                            document.getElementById('den-total').textContent = b44Num.toLocaleString();
+                            document.getElementById('den-reimburse').textContent = b45Num.toLocaleString();
+                            document.getElementById('den-sso').textContent = b46Num.toLocaleString();
+
+                            // คำนวณค่ารักษาแยกตามสิทธิ (B17, B21, B37)
+                            const costCgd = getNum(15); // แถว 17 (B17)
+                            const costDla = getNum(19); // แถว 21 (B21)
+                            const costSelf = getNum(35); // แถว 37 (B37)
+
+                            const totalCost = costCgd + costDla + costSelf;
+
+                            // แสดงผลเงินแบบไม่มีทศนิยม
+                            const costTotalEl = document.getElementById('stat-cost-total');
+                            if (costTotalEl) costTotalEl.textContent = totalCost.toLocaleString();
+
+                            document.getElementById('cost-cgd').textContent = costCgd.toLocaleString();
+                            document.getElementById('cost-dla').textContent = costDla.toLocaleString();
+                            document.getElementById('cost-self').textContent = costSelf.toLocaleString();
+                            
+                            // ดึงข้อมูลจำนวนคน (B13, B18, B34)
+                            document.getElementById('count-cgd').textContent = getNum(11).toLocaleString(); // แถว 13 (B13)
+                            document.getElementById('count-dla').textContent = getNum(16).toLocaleString(); // แถว 18 (B18)
+                            document.getElementById('count-self').textContent = getNum(32).toLocaleString(); // แถว 34 (B34)
 
 
                             // คำนวณตาราง ผู้ป่วยนอกแยกตามสิทธิ
@@ -742,11 +763,6 @@
                             const totalPctEl = document.getElementById('total-pct');
                             totalPctEl.textContent = totalPctObj.text;
                             totalPctEl.className = `px-3 py-3 text-center font-bold ${totalPctObj.color}`;
-
-                            // ข้อมูลเสริมข้อความรอง (กรมบัญชีกลาง และ เบิกได้ อปท.)
-                            document.getElementById('cgd-edc-count').textContent = getNum(14).toLocaleString(); // แถว 16 (B16)
-                            document.getElementById('cgd-edc-amount').textContent = getNum(15).toLocaleString(); // แถว 17 (B17)
-                            document.getElementById('dla-amount').textContent = getNum(19).toLocaleString(); // แถว 21 (B21)
                         }
 
                         /* เนื่องจากไม่ทราบโครงสร้าง Column ใน Google Sheets ที่แน่ชัด 
