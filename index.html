@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบติดตามการให้บริการผู้ป่วยกลุ่มเป้าหมาย | รพ.กุสุมาลย์</title>
+    <title>ระบบติดตามการให้บริการผู้ป่วยกลุ่มเป้าหมาย รพ.กุสุมาลย์</title>
     
     <!-- Google Fonts: Prompt -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,7 +167,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <div>
                         <h2 class="text-xl font-bold text-slate-800 mb-0">หอผู้ป่วยปุญโญภาส</h2>
-                        <p class="text-slate-500 text-xs mt-1">จำนวนเตียงทั้งหมด 6 เตียง</p>
+                        <p class="text-slate-500 text-xs mt-1">จำนวนเตียงทั้งหมด 8 เตียง</p>
                     </div>
                     <div class="p-3 bg-brand-50 text-brand-600 rounded-2xl shadow-inner border border-brand-100">
                         <i data-lucide="heart-pulse" class="w-6 h-6"></i>
@@ -195,7 +195,7 @@
                             </div>
                         </div>
                         <div class="mt-2 text-slate-500 text-xs font-medium">
-                            เป้าหมาย 60 ราย (<span id="stat-punyo-percent" class="font-bold">-</span>%)
+                            เป้าหมาย 80 ราย (<span id="stat-punyo-percent" class="font-bold">-</span>%)
                         </div>
                     </div>
                 </div>
@@ -251,7 +251,7 @@
                     <i data-lucide="activity" class="w-6 h-6 text-brand-500"></i>
                     อัตราครองเตียงรวม
                 </h2>
-                <p class="text-slate-500 text-sm mt-1">จำนวนเตียงรวม 42 เตียง (สามัญ + ปุญโญภาส)</p>
+                <p class="text-slate-500 text-sm mt-1">จำนวนเตียงรวม 44 เตียง (สามัญ + ปุญโญภาส)</p>
             </div>
             
             <div class="relative pt-6 pb-2">
@@ -587,9 +587,9 @@
                             document.getElementById('stat-punyo-total').textContent = b9Value;
                             document.getElementById('stat-punyo-today').textContent = b10Value;
 
-                            // คำนวณเปอร์เซ็นต์ หอผู้ป่วยปุญโญภาส (เป้า 60 ราย)
+                            // คำนวณเปอร์เซ็นต์ หอผู้ป่วยปุญโญภาส (เป้า 80 ราย)
                             const punyoTotal = parseInt(b9Value.replace(/,/g, '')) || 0;
-                            document.getElementById('stat-punyo-percent').textContent = ((punyoTotal / 60) * 100).toFixed(1);
+                            document.getElementById('stat-punyo-percent').textContent = ((punyoTotal / 80) * 100).toFixed(1);
 
                             // --- ฟังก์ชันเสริม: ช่วยดึงข้อมูลและแปลงเป็นตัวเลขเพื่อคำนวณกราฟ ---
                             const getNum = (rowIndex) => {
@@ -627,7 +627,7 @@
                             const b53Num = getNum(51) || 1; // แถวที่ 53 (index 51) - กันหาร 0
                             const b54Num = getNum(52) || 1; // แถวที่ 54 (index 52) - กันหาร 0
 
-                            const punDayPct = ((b10Num * 100) / 6).toFixed(1);
+                            const punDayPct = ((b10Num * 100) / 8).toFixed(1);
                             const punMonthPct = ((b11Num * 100) / b53Num).toFixed(1);
                             const punYearPct = ((b12Num * 100) / b54Num).toFixed(1);
 
@@ -644,7 +644,7 @@
                             const b55Num = getNum(53) || 1; // แถวที่ 55 (index 53) - กันหาร 0
                             const b56Num = getNum(54) || 1; // แถวที่ 56 (index 54) - กันหาร 0
 
-                            const totalDayPct = (((b5Num + b10Num) * 100) / 42).toFixed(1);
+                            const totalDayPct = (((b5Num + b10Num) * 100) / 44).toFixed(1);
                             const totalMonthPct = (((b6Num + b11Num) * 100) / b55Num).toFixed(1);
                             const totalYearPct = (((b7Num + b12Num) * 100) / b56Num).toFixed(1);
 
