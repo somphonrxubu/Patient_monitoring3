@@ -66,7 +66,7 @@
                 <h1 class="text-2xl md:text-3xl font-bold mb-2 tracking-tight">ระบบติดตามการให้บริการผู้ป่วยกลุ่มเป้าหมาย</h1>
                 <p class="text-brand-100 text-base md:text-lg font-light flex items-center gap-2">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    โรงพยาบาลกุสุมาลย์ จังหวัดสกลนคร | ปีงบประมาณ 2569
+                    โรงพยาบาลกุสุมาลย์ จังหวัดสกลนคร | ปีงบประมาณ 2570
                 </p>
             </div>
             <div class="flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full text-sm backdrop-blur-sm border border-white/10">
@@ -447,7 +447,7 @@
                         ค่ารักษาพยาบาลแยกตามสิทธิ
                     </h2>
                     <div class="flex items-center gap-2 mt-1 ml-8 flex-wrap">
-                        <p class="text-slate-500 text-sm">รวม <span id="stat-cost-total" class="font-bold text-emerald-700">-</span> บาท <span class="text-xs">(เป้าหมาย 45,000 บาท/วัน)</span></p>
+                        <p class="text-slate-500 text-sm">รวม <span id="stat-cost-total" class="font-bold text-emerald-700">-</span> บาท <span class="text-xs">(เป้าหมาย 40,000 บาท/วัน)</span></p>
                         <div id="cost-target-badge" class="hidden items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold"></div>
                     </div>
                 </div>
@@ -711,11 +711,11 @@
                             const costTotalEl = document.getElementById('stat-cost-total');
                             if (costTotalEl) costTotalEl.textContent = totalCost.toLocaleString();
 
-                            // ประเมินเป้าหมาย 45,000 บาท/วัน
+                            // ประเมินเป้าหมาย 40,000 บาท/วัน
                             const targetBadge = document.getElementById('cost-target-badge');
                             if (targetBadge) {
                                 targetBadge.classList.remove('hidden');
-                                if (totalCost >= 45000) {
+                                if (totalCost >= 40000) {
                                     targetBadge.className = 'flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-green-100 text-green-700';
                                     targetBadge.innerHTML = '<i data-lucide="check" class="w-3.5 h-3.5"></i> บรรลุเป้าหมาย';
                                 } else {
